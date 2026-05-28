@@ -1,0 +1,9 @@
+.DS_Store
+.env
+.env.*
+*.log
+node_modules/
+__pycache__/
+.pytest_cache/
+.idea/
+.vscode/

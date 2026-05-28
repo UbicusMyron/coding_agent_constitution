@@ -1,0 +1,4 @@
+interface:
+  display_name: "Constitution Skill"
+  short_description: "Turn vague software intent into cross-agent governance assets."
+  default_prompt: "Help me turn this software idea into SPEC, ARCH, RULES, CONTRACTS, AGENTS.md, CLAUDE.md, Cursor rules, and bounded tasks before coding."

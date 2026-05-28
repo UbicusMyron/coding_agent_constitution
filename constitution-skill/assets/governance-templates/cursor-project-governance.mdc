@@ -1,0 +1,15 @@
+---
+description: Project governance and review rules for coding agents. Apply when implementing, reviewing, or planning changes in this repository.
+globs: "**/*"
+alwaysApply: true
+---
+
+# Project Governance Rules
+
+- Check changes against `docs/SPEC.md`, `docs/ARCH.md`, and `docs/RULES.md`.
+- Read the relevant `docs/TASKS/*.md` before implementation.
+- Flag changes that cross module boundaries without updating `docs/ARCH.md`.
+- Flag public API, schema, event, or file format changes without a matching `docs/CONTRACTS/` update.
+- Flag new behavior without acceptance criteria or tests.
+- Prefer small local rewrites during review; do not perform broad rewrites unless the task explicitly asks for them.
+- Escalate risky changes to the human before merge.
