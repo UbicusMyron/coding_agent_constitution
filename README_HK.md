@@ -42,6 +42,8 @@ CLAUDE.md                     Claude Code 入口
 
 > 它把「聊天入面的想法」變成「倉庫入面的資產」。
 
+如果上面這些檔名你大部分都未熟，沒問題。先讀 [`constitution-skill/references/rookie-onboarding.md`](constitution-skill/references/rookie-onboarding.md)，這份是給「第一次做軟件產品的人」準備的簡短入門，讀完再回來這裡。
+
 ## 為甚麼需要它？
 
 直接叫智能體寫程式碼，常見問題是：
@@ -63,6 +65,20 @@ CLAUDE.md                     Claude Code 入口
 -> 決策再沉澱回檔案
 ```
 
+## 適合邊個用？
+
+這是一個**階段性工具**：用在「我有一個軟件產品的想法」同「我已經有一位工程師完全接手項目」之間嘅一段時間。它的設計係鋒利、專注，唔會試圖乜都做。
+
+如果你係以下其中一種，這個 skill 可能適合你：
+
+- 一位準備啟動新項目的產品經理，希望文檔比 kickoff 聊天活得更耐
+- 喺做副業項目、之後會搵協作者入嚟的人
+- 領域專家（設計師、分析員、營運）第一次做軟件產品
+- 願意學少少工程的非技術 founder，令成品可以順利移交
+- 想喺 agent 開始改程式碼之前先建立好基線的工程師
+
+如果你對生成出嚟的檔案中的工程術語仲好陌生，請先讀 [`constitution-skill/references/rookie-onboarding.md`](constitution-skill/references/rookie-onboarding.md)。呢份係給「第一次做軟件產品的人」準備的簡短概念入門，唔要求你識寫程式碼。
+
 ## 甚麼時候適合用？
 
 適合：
@@ -80,6 +96,17 @@ CLAUDE.md                     Claude Code 入口
 - 只改一個函數
 - 純粹格式化程式碼
 - 取代人類做產品或架構最終決策
+- 想完全唔接觸任何工程概念（這是學習腳手架，唔係 no-code 平台）
+
+## 幾時應該停止用？
+
+這個 skill 的設計是：當項目穩定之後，它會主動退出日常流程。合理的「畢業」信號包括：
+
+- 已經有一位全職工程師在維護 `docs/SPEC.md`、`docs/ARCH.md`、`docs/RULES.md`
+- 每個改動都會經人手 code review
+- 團隊已經有自己的 onboarding 文檔，可以取代 rookie primer
+
+到這一步之後，那啲長期檔案仲會繼續用，但 skill 本身已經唔再係你日常入口。
 
 ## 三大智能體兼容方式
 
@@ -280,20 +307,32 @@ review 工具檢查 diff。
    ├─ agents/
    │  └─ openai.yaml
    ├─ references/
-   │  ├─ bootstrap-question-bank.md
-   │  ├─ cross-agent-compatibility.md
-   │  └─ governance-asset-guide.md
-   └─ assets/
-      └─ governance-templates/
-         ├─ AGENTS.md
-         ├─ CLAUDE.md
-         ├─ SPEC.md
-         ├─ ARCH.md
-         ├─ RULES.md
-         ├─ TASK.md
-         ├─ CONTRACTS_README.md
-         ├─ cursor-project-governance.mdc
-         └─ claude-project-governance.md
+   │  ├─ rookie-onboarding.md          # 給第一次做軟件產品的人的概念入門
+   │  ├─ bootstrap-question-bank.md    # 應該問甚麼問題
+   │  ├─ cross-agent-compatibility.md  # Codex / Cursor / Claude Code 適配映射
+   │  ├─ governance-asset-guide.md     # 長期 vs 一次性資產、提升規則
+   │  ├─ anti-patterns.md              # 常見的治理反模式
+   │  ├─ task-sizing.md                # 量化的 bounded task 限制
+   │  ├─ retrofit-mode.md              # 把治理引入 legacy 倉庫
+   │  ├─ governance-evolution.md       # 版本演進、ADR、歸檔
+   │  └─ minimal-mode.md               # 單人 / 極簡項目的輕量模式
+   ├─ assets/
+   │  ├─ governance-templates/
+   │  │  ├─ AGENTS.md
+   │  │  ├─ CLAUDE.md
+   │  │  ├─ SPEC.md
+   │  │  ├─ ARCH.md
+   │  │  ├─ RULES.md
+   │  │  ├─ TASK.md
+   │  │  ├─ DECISION.md
+   │  │  ├─ CONTRACTS_README.md
+   │  │  ├─ cursor-project-governance.mdc
+   │  │  └─ claude-project-governance.md
+   │  ├─ contracts-examples/           # 填好的 OpenAPI / JSON Schema / event / SQL / CLI / 檔案格式範例
+   │  └─ examples/
+   │     └─ feedback-inbox/            # 完整填好的樣例項目
+   └─ scripts/
+      └─ check-governance.sh           # 漂移與缺失段落檢測腳本
 ```
 
 ## 授權

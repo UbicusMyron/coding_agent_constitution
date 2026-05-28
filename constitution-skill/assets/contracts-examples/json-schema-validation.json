@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/contracts/feedback-create.schema.json",
+  "title": "FeedbackCreate",
+  "description": "Validation contract for inbound feedback submissions. Update in the same PR as the handler. Owner: feedback-team.",
+  "type": "object",
+  "required": ["source", "message"],
+  "additionalProperties": false,
+  "properties": {
+    "source": {
+      "type": "string",
+      "enum": ["web", "mobile", "zapier", "api"],
+      "description": "Origin of the submission. Determines downstream routing."
+    },
+    "email": {
+      "type": ["string", "null"],
+      "format": "email",
+      "maxLength": 254,
+      "description": "Optional contact email. Null when anonymous."
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000,
+      "description": "Free-form feedback text. Trimmed before storage."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]{0,31}$"
+      },
+      "maxItems": 8,
+      "uniqueItems": true
+    }
+  },
+  "examples": [
+    {
+      "source": "web",
+      "email": "alice@example.com",
+      "message": "Dark mode toggle would be great.",
+      "tags": ["ui", "accessibility"]
+    },
+    {
+      "source": "api",
+      "email": null,
+      "message": "Anonymous feedback."
+    }
+  ],
+  "$comment": "Invalid example (must be rejected): {\"source\":\"web\"} -- missing required 'message'."
+}

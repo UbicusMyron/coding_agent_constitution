@@ -42,6 +42,8 @@ CLAUDE.md                     Claude Code 入口
 
 > 它把“聊天里的想法”变成“仓库里的资产”。
 
+如果上面这些文件名你大部分都不熟悉，没关系。先读 [`constitution-skill/references/rookie-onboarding.md`](constitution-skill/references/rookie-onboarding.md)，这是给“第一次做软件产品的人”准备的简短入门，读完再回来这里。
+
 ## 为什么需要它？
 
 直接让智能体写代码，常见问题是：
@@ -63,6 +65,20 @@ CLAUDE.md                     Claude Code 入口
 -> 决策再沉淀回文件
 ```
 
+## 适合谁？
+
+这是一个**阶段性工具**：在“我有一个软件产品的想法”和“我已经有一位工程师把这个项目完全接管下来”之间这段窗口里有用。它的设计是锋利、专注，不试图覆盖所有事。
+
+可能适合你，如果你是：
+
+- 一位准备启动新项目的产品经理，希望文档比 kickoff 聊天活得更久
+- 在做副业项目、之后会拉协作者进来的人
+- 领域专家（设计师、分析师、运营）第一次做软件产品
+- 愿意学一点工程的非技术 founder，让产物可移交
+- 想在 agent 动代码之前先把基线立好的工程师
+
+如果你对生成出来的文件里的工程术语还很陌生，请先读 [`constitution-skill/references/rookie-onboarding.md`](constitution-skill/references/rookie-onboarding.md)。这是面向“第一次做软件产品的人”的简短概念入门，不要求你会写代码。
+
 ## 它适合什么时候用？
 
 适合：
@@ -80,6 +96,17 @@ CLAUDE.md                     Claude Code 入口
 - 只改一个函数
 - 纯粹格式化代码
 - 替代人类做产品或架构最终决策
+- 想完全不接触任何工程概念（这是学习脚手架，不是 no-code 平台）
+
+## 什么时候应该停止使用它？
+
+这个 skill 的设计是：当项目稳定下来后，它会主动退出日常工作流。合理的“毕业”信号包括：
+
+- 已经有一位全职工程师在维护 `docs/SPEC.md`、`docs/ARCH.md`、`docs/RULES.md`
+- 每个改动都在走人工 code review
+- 团队已经有自己的 onboarding 文档，能替代 rookie primer
+
+到这一步之后，那些长期文件仍然在跑，但 skill 本身已经不再是你每天的入口。
 
 ## 三大智能体兼容方式
 
@@ -280,20 +307,32 @@ review 工具检查 diff。
    ├─ agents/
    │  └─ openai.yaml
    ├─ references/
-   │  ├─ bootstrap-question-bank.md
-   │  ├─ cross-agent-compatibility.md
-   │  └─ governance-asset-guide.md
-   └─ assets/
-      └─ governance-templates/
-         ├─ AGENTS.md
-         ├─ CLAUDE.md
-         ├─ SPEC.md
-         ├─ ARCH.md
-         ├─ RULES.md
-         ├─ TASK.md
-         ├─ CONTRACTS_README.md
-         ├─ cursor-project-governance.mdc
-         └─ claude-project-governance.md
+   │  ├─ rookie-onboarding.md          # 给第一次做软件产品的人的概念入门
+   │  ├─ bootstrap-question-bank.md    # 该问什么问题
+   │  ├─ cross-agent-compatibility.md  # Codex / Cursor / Claude Code 适配映射
+   │  ├─ governance-asset-guide.md     # 长期 vs 一次性资产、提升规则
+   │  ├─ anti-patterns.md              # 常见的治理反模式
+   │  ├─ task-sizing.md                # 量化的 bounded task 限制
+   │  ├─ retrofit-mode.md              # 把治理引入 legacy 仓库
+   │  ├─ governance-evolution.md       # 版本演进、ADR、归档
+   │  └─ minimal-mode.md               # 单人 / 极简项目的轻量模式
+   ├─ assets/
+   │  ├─ governance-templates/
+   │  │  ├─ AGENTS.md
+   │  │  ├─ CLAUDE.md
+   │  │  ├─ SPEC.md
+   │  │  ├─ ARCH.md
+   │  │  ├─ RULES.md
+   │  │  ├─ TASK.md
+   │  │  ├─ DECISION.md
+   │  │  ├─ CONTRACTS_README.md
+   │  │  ├─ cursor-project-governance.mdc
+   │  │  └─ claude-project-governance.md
+   │  ├─ contracts-examples/           # 填好的 OpenAPI / JSON Schema / event / SQL / CLI / 文件格式范例
+   │  └─ examples/
+   │     └─ feedback-inbox/            # 完整填好的样例项目
+   └─ scripts/
+      └─ check-governance.sh           # 漂移与缺失段落检测脚本
 ```
 
 ## 许可证

@@ -1,0 +1,179 @@
+openapi: 3.0.3
+info:
+  title: Feedback Inbox API
+  version: 0.1.0
+  description: |
+    Example REST contract for a feedback inbox service.
+    Owner: feedback-team. Consumers: web app, mobile app, Zapier integration.
+    Update this file in the same PR as any handler change.
+servers:
+  - url: https://api.example.com/v1
+    description: Production
+  - url: http://localhost:3000/v1
+    description: Local dev
+paths:
+  /feedback:
+    post:
+      summary: Submit feedback
+      operationId: submitFeedback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackCreate'
+            examples:
+              valid:
+                summary: Valid submission
+                value:
+                  source: web
+                  email: alice@example.com
+                  message: "Dark mode toggle would be great."
+                  tags: ["ui", "accessibility"]
+              missingMessage:
+                summary: Invalid - missing required field
+                value:
+                  source: web
+                  email: alice@example.com
+      responses:
+        '201':
+          description: Feedback recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feedback'
+        '400':
+          description: Validation failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                missingMessage:
+                  value:
+                    code: validation_error
+                    message: "message is required"
+                    fields:
+                      - field: message
+                        rule: required
+        '429':
+          description: Rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      summary: List feedback
+      operationId: listFeedback
+      parameters:
+        - in: query
+          name: source
+          schema:
+            type: string
+            enum: [web, mobile, zapier, api]
+        - in: query
+          name: cursor
+          schema:
+            type: string
+          description: Opaque cursor from previous response
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+      responses:
+        '200':
+          description: Page of feedback
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackPage'
+components:
+  schemas:
+    FeedbackCreate:
+      type: object
+      required: [source, message]
+      properties:
+        source:
+          type: string
+          enum: [web, mobile, zapier, api]
+        email:
+          type: string
+          format: email
+          nullable: true
+        message:
+          type: string
+          minLength: 1
+          maxLength: 4000
+        tags:
+          type: array
+          items:
+            type: string
+            pattern: '^[a-z][a-z0-9-]{0,31}$'
+          maxItems: 8
+    Feedback:
+      type: object
+      required: [id, source, message, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        source:
+          type: string
+        email:
+          type: string
+          nullable: true
+        message:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+    FeedbackPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Feedback'
+        nextCursor:
+          type: string
+          nullable: true
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            - validation_error
+            - not_found
+            - rate_limited
+            - unauthorized
+            - forbidden
+            - conflict
+            - internal_error
+        message:
+          type: string
+        fields:
+          type: array
+          items:
+            type: object
+            required: [field, rule]
+            properties:
+              field:
+                type: string
+              rule:
+                type: string

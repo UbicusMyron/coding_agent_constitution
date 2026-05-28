@@ -1,6 +1,6 @@
 ---
 name: constitution-skill
-description: Transform vague software product intent into durable repo-native governance assets before coding, with adapters for Codex, Cursor, and Claude Code. Use when a user has an unclear idea, incomplete technical direction, undefined architecture, missing API/data contracts, unclear feature boundaries, or wants to establish SPEC.md, ARCH.md, RULES.md, CONTRACTS/, AGENTS.md, CLAUDE.md, .cursor/rules/*.mdc, .claude/rules/*.md, and bounded TASKS before implementation. Also use when converting chat-only requirements into reusable project files, designing a Codex/Cursor/Claude Code/Human collaboration workflow, or preparing a project so coding agents can implement safely in reviewable units. Do not use for already-scoped small code changes unless the user asks to update governance assets first.
+description: Transform vague software product intent into durable repo-native governance assets before coding, with adapters for Codex, Cursor, and Claude Code. Use when a user has an unclear idea, incomplete technical direction, undefined architecture, missing API/data contracts, unclear feature boundaries, or wants to establish SPEC.md, ARCH.md, RULES.md, CONTRACTS/, AGENTS.md, CLAUDE.md, .cursor/rules/*.mdc, .claude/rules/*.md, and bounded TASKS before implementation. Also use when converting chat-only requirements into reusable project files, designing a Codex/Cursor/Claude Code/Human collaboration workflow, or preparing a project so coding agents can implement safely in reviewable units. Supports three modes: standard (greenfield), retrofit (legacy repo), and minimal (solo or throwaway). Do not use for already-scoped small code changes unless the user asks to update governance assets first.
 ---
 
 # Constitution Skill
@@ -10,6 +10,18 @@ description: Transform vague software product intent into durable repo-native go
 Turn ambiguous software intent into durable project files before implementation. Treat specs, architecture, contracts, and rules as reusable assets; treat task plans, implementation notes, and one-off agent prompts as consumables.
 
 This skill follows the portable `SKILL.md` shape so it can be installed as a Codex skill, Claude Code skill, or Cursor Agent Skill. The governance assets it creates should also work when different agents rotate through the same repository.
+
+## Modes
+
+Pick the mode that matches the project before doing anything else.
+
+| Mode | When | Output Footprint | Reference |
+| --- | --- | --- | --- |
+| Standard | Greenfield or growing project, multiple agents, real users expected | Full file set (~9 files) | This document, sections below |
+| Retrofit | Existing codebase with no governance, mixed conventions, legacy code | Incremental, seam-first | `references/retrofit-mode.md` |
+| Minimal | Solo, weekend, throwaway, no production traffic | 1-3 files | `references/minimal-mode.md` |
+
+Default to Standard. Drop to Minimal only when at least three of these are true: single contributor, lifespan under 3 months, one coding agent, no external API, no auth, no persistent user data. Switch to Retrofit when the repo already has substantial code without governance assets.
 
 ## Operating Model
 
@@ -46,6 +58,9 @@ Keep one main editor per work cycle. Let Codex perform the main modification, th
    - Capture implementation slices in `TASKS/*.md`; keep them disposable and specific.
    - Use `references/governance-asset-guide.md` when deciding whether information belongs in a durable asset or a disposable task artifact.
    - Use `references/cross-agent-compatibility.md` when creating tool-specific adapters.
+   - Use `references/anti-patterns.md` to avoid common failure modes in each governance file.
+   - Use `references/governance-evolution.md` for versioning, ADR superseded chains, and archival.
+   - Point first-time product builders to `references/rookie-onboarding.md` so the engineering vocabulary in the generated files is approachable.
 
 4. Ask only the questions needed to remove dangerous ambiguity.
    - Prefer 3 to 7 high-leverage questions.
@@ -63,7 +78,10 @@ Keep one main editor per work cycle. Let Codex perform the main modification, th
 
 6. Create bounded implementation tasks.
    - Each task must have one clear goal, explicit constraints, limited touched surface area, acceptance criteria, and verification commands.
-   - Make tasks small enough for one agent pass and one human/Cursor review pass.
+   - Apply the quantifiable sizing rules in `references/task-sizing.md`:
+     - touched files <= 5, diff <= ~300 lines, new top-level modules <= 1, public API changes <= 2, schema changes <= 1, verification commands <= 3.
+     - Crossing one limit is acceptable; crossing two means consider splitting; crossing three means split now.
+   - Acceptance criteria: 2-6 items. Verification: 1-3 exact commands (not "manually verify").
    - Do not create broad tasks like "clean up the codebase" or "improve reliability everywhere".
 
 7. Handoff for implementation and review.
@@ -71,21 +89,54 @@ Keep one main editor per work cycle. Let Codex perform the main modification, th
    - After coding, summarize what changed, checks run, residual risks, and what Cursor/human should review.
    - Promote repeated review feedback into `RULES.md`, `.cursor/rules/`, or `AGENTS.md`.
 
+8. Validate before declaring done.
+   - Run `scripts/check-governance.sh` from the project root.
+   - The script verifies adapter orphans, required sections in TASKS/SPEC/ARCH/RULES, contract references, adapter duplication, and `Last Reviewed` staleness.
+   - Any reported `ERROR` blocks completion; `WARN` items should be addressed or explicitly accepted in handoff notes.
+
 ## Output Contract
 
-When bootstrapping a project, aim to produce:
+The file set depends on mode.
+
+### Standard Mode (default)
 
 - `docs/SPEC.md`
 - `docs/ARCH.md`
 - `docs/RULES.md`
-- `docs/CONTRACTS/README.md`
+- `docs/CONTRACTS/README.md` plus one file per real interface (see `assets/contracts-examples/` for format choices)
 - `docs/TASKS/001-<slug>.md`
+- `docs/DECISIONS/001-<slug>.md` for any irreversible decision discovered during bootstrap
 - `AGENTS.md`
 - `CLAUDE.md`
 - `.cursor/rules/project-governance.mdc`
 - `.claude/rules/project-governance.md`
 
-For smaller or existing projects, update only the files needed to clarify the next bounded task.
+A fully filled example of this set lives in `assets/examples/feedback-inbox/`. Use it as a reference for what good looks like, not as a starter template.
+
+### Retrofit Mode
+
+Follow `references/retrofit-mode.md`. Produce, in order:
+
+1. `AGENTS.md` at root (under 100 lines).
+2. `docs/CONTRACTS/<seam>.md` for the next module about to change.
+3. `docs/ARCH.md` with a single-module entry.
+4. `docs/RULES.md` with only the rules relevant to the seam.
+5. `docs/SPEC.md` scoped to the seam (mark `## Scope`).
+6. `docs/TASKS/001-<slug>.md` referencing all of the above.
+
+Do not try to document the whole legacy repo at once.
+
+### Minimal Mode
+
+Follow `references/minimal-mode.md`. Produce only:
+
+- `AGENTS.md` (under ~60 lines).
+- `docs/PLAN.md` (combined SPEC + TASKS + decisions log).
+- Optionally `CLAUDE.md` if Claude Code is the active agent.
+
+Promote out of Minimal Mode immediately when any of these happen: new contributor, real user data, public API, second active coding agent, deployment to production.
+
+### Location Note
 
 Do not use `.vscode/` as the primary place for agent governance. Cursor is VS Code-based, but Cursor agent rules live in Cursor-specific locations such as `.cursor/rules/` and `.cursor/skills/`.
 
@@ -152,3 +203,44 @@ Before finishing, check:
 - Contracts exist before implementation when interfaces matter.
 - Repeated standards are promoted into persistent rules.
 - Codex, Cursor, and Claude Code each have a readable entrypoint into the same governance source of truth.
+- `scripts/check-governance.sh` reports zero `ERROR` items.
+
+## Anti-Patterns To Avoid
+
+Read `references/anti-patterns.md` for the full catalog. The most common pitfalls:
+
+- SPEC written as sprint backlog or implementation manual.
+- ARCH module table with no `Must Not Own` column.
+- RULES file full of generic programming advice rather than repo-specific rules.
+- CONTRACTS expressed as prose instead of schemas; no error envelope defined.
+- Tasks named after whole features, with no `Do Not Touch` and no verification command.
+- Three near-identical copies of the same rules in `AGENTS.md`, `CLAUDE.md`, and `.cursor/rules/`.
+- Governance files created at bootstrap and never updated again.
+
+## File Map
+
+This skill ships:
+
+```text
+constitution-skill/
+├── SKILL.md
+├── agents/
+│   └── openai.yaml
+├── references/
+│   ├── bootstrap-question-bank.md       # which questions to ask the user
+│   ├── cross-agent-compatibility.md     # Codex/Cursor/Claude adapter mapping
+│   ├── governance-asset-guide.md        # durable vs disposable, promotion rules
+│   ├── anti-patterns.md                 # common failure modes to avoid
+│   ├── task-sizing.md                   # quantifiable bounded-task rules
+│   ├── retrofit-mode.md                 # applying governance to legacy repos
+│   ├── governance-evolution.md          # versioning, ADRs, archival
+│   ├── minimal-mode.md                  # solo/throwaway lightweight setup
+│   └── rookie-onboarding.md             # concept primer for first-time product builders
+├── assets/
+│   ├── governance-templates/            # blank starters for each file
+│   ├── contracts-examples/              # filled OpenAPI / JSON Schema / event / SQL / CLI / file-format
+│   └── examples/
+│       └── feedback-inbox/              # fully filled worked example
+└── scripts/
+    └── check-governance.sh              # drift and missing-section detector
+```

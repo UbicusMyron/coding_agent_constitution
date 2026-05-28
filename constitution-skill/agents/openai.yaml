@@ -1,4 +1,82 @@
 interface:
+  name: constitution-skill
   display_name: "Constitution Skill"
-  short_description: "Turn vague software intent into cross-agent governance assets."
-  default_prompt: "Help me turn this software idea into SPEC, ARCH, RULES, CONTRACTS, AGENTS.md, CLAUDE.md, Cursor rules, and bounded tasks before coding."
+  short_description: "Turn vague software intent into cross-agent governance assets before coding."
+  long_description: |
+    Transforms unclear software ideas into durable, repo-native governance files that work across Codex, Cursor, and Claude Code.
+
+    Produces SPEC.md, ARCH.md, RULES.md, CONTRACTS/, AGENTS.md, CLAUDE.md, .cursor/rules/, .claude/rules/, and bounded TASKS.
+
+    Includes operating modes for new projects, legacy retrofits, and solo/minimal setups.
+  default_prompt: |
+    Help me turn this software idea into governance assets before coding.
+    Use the constitution-skill workflow:
+    1) discover existing context, 2) ask the smallest useful set of questions,
+    3) produce SPEC.md, ARCH.md, RULES.md, CONTRACTS/, AGENTS.md, CLAUDE.md, and one bounded task,
+    4) hand off for implementation.
+  tags:
+    - governance
+    - planning
+    - cross-agent
+    - bootstrap
+    - codex
+    - cursor
+    - claude-code
+inputs:
+  - name: project_intent
+    description: One paragraph describing what the user wants to build.
+    required: true
+  - name: existing_repo
+    description: |
+      Path to an existing repository, or "none" for greenfield.
+      If provided, the skill uses retrofit mode (see references/retrofit-mode.md).
+    required: false
+    default: "none"
+  - name: scale
+    description: |
+      One of "minimal" (solo/throwaway), "standard" (default), or "team" (multi-agent multi-person).
+      Selects which governance file set is produced. See references/minimal-mode.md for the minimal variant.
+    required: false
+    default: "standard"
+  - name: target_agents
+    description: "Comma-separated list of agents that will operate on the repo. Any of: codex, cursor, claude."
+    required: false
+    default: "codex,cursor,claude"
+examples:
+  - title: Greenfield SaaS bootstrap
+    prompt: |
+      I want to build a SaaS tool for small teams to collect customer feedback,
+      summarize feature requests, and generate development tasks.
+      I do not know the stack, architecture, database, or API design yet.
+      Use constitution-skill to create governance assets before coding.
+    expected_outputs:
+      - docs/SPEC.md
+      - docs/ARCH.md
+      - docs/RULES.md
+      - docs/CONTRACTS/README.md
+      - docs/TASKS/001-bootstrap.md
+      - AGENTS.md
+      - CLAUDE.md
+      - .cursor/rules/project-governance.mdc
+      - .claude/rules/project-governance.md
+  - title: Legacy retrofit
+    prompt: |
+      We have a 5-year-old monorepo with no SPEC and mixed conventions.
+      Use constitution-skill in retrofit mode to add minimal governance around the payments module
+      before I send a refactor task to Codex.
+    expected_outputs:
+      - AGENTS.md
+      - docs/CONTRACTS/payments.md
+      - docs/ARCH.md (single module entry for payments)
+      - docs/RULES.md (minimal)
+      - docs/TASKS/001-payments-stabilize.md
+  - title: Minimal solo project
+    prompt: |
+      Weekend CLI to scrape my RSS feeds into Markdown.
+      Use constitution-skill in minimal mode; do not create more than two files.
+    expected_outputs:
+      - AGENTS.md
+      - docs/PLAN.md
+verification:
+  command: scripts/check-governance.sh
+  description: Validates governance asset structure and detects drift after the skill runs.

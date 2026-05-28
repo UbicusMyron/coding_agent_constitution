@@ -44,6 +44,8 @@ In one sentence:
 
 > It turns chat-only intent into reusable repository assets.
 
+If most of the filenames above are unfamiliar, that is expected. Start with [`constitution-skill/references/rookie-onboarding.md`](constitution-skill/references/rookie-onboarding.md) for a short concept primer, then come back.
+
 ## Why Does This Exist?
 
 Coding agents are powerful, but starting with code too early creates drift:
@@ -66,6 +68,20 @@ vague intent
 -> durable decisions go back into files
 ```
 
+## Who This Is For
+
+This is a stage-specific tool, useful in the window between "I have an idea for a software product" and "I have an engineer who has fully taken over the project". It is meant to be sharp, not exhaustive.
+
+Likely useful if you are:
+
+- a product manager starting a new project and want the docs to outlive the kickoff chat
+- someone building a side project and planning to bring in collaborators later
+- a domain expert (designer, analyst, operator) shipping a first software product
+- a non-technical founder who is willing to learn a little engineering so the work is portable
+- an engineer who wants to set a clean baseline before letting agents touch the repo
+
+If you are new to the engineering vocabulary in the generated files, read [`constitution-skill/references/rookie-onboarding.md`](constitution-skill/references/rookie-onboarding.md) first. It is a short concept primer aimed at first-time product builders and does not assume coding skill.
+
 ## When Should I Use It?
 
 Use it when:
@@ -84,6 +100,17 @@ Do not use it for:
 - single-function edits
 - pure formatting
 - replacing human product or architecture decisions
+- avoiding the need to understand any engineering at all (it is a learning scaffold, not a no-code platform)
+
+## When To Stop Using It
+
+This skill is designed to step out of the way once a project has stabilized. Reasonable graduation signals:
+
+- a full-time engineer has taken over maintenance of `docs/SPEC.md`, `docs/ARCH.md`, and `docs/RULES.md`
+- code review by humans is happening regularly on every change
+- the team has its own onboarding doc that supersedes the rookie primer
+
+After that point, the durable files keep working, but the skill itself is no longer the daily entrypoint.
 
 ## Compatibility
 
@@ -271,20 +298,32 @@ Disposable plans can be replaced.
    ├─ agents/
    │  └─ openai.yaml
    ├─ references/
-   │  ├─ bootstrap-question-bank.md
-   │  ├─ cross-agent-compatibility.md
-   │  └─ governance-asset-guide.md
-   └─ assets/
-      └─ governance-templates/
-         ├─ AGENTS.md
-         ├─ CLAUDE.md
-         ├─ SPEC.md
-         ├─ ARCH.md
-         ├─ RULES.md
-         ├─ TASK.md
-         ├─ CONTRACTS_README.md
-         ├─ cursor-project-governance.mdc
-         └─ claude-project-governance.md
+   │  ├─ rookie-onboarding.md          # concept primer for first-time product builders
+   │  ├─ bootstrap-question-bank.md    # which questions to ask
+   │  ├─ cross-agent-compatibility.md  # Codex / Cursor / Claude Code adapter mapping
+   │  ├─ governance-asset-guide.md     # durable vs disposable, promotion rules
+   │  ├─ anti-patterns.md              # common failure modes to avoid
+   │  ├─ task-sizing.md                # quantifiable bounded-task rules
+   │  ├─ retrofit-mode.md              # applying governance to a legacy repo
+   │  ├─ governance-evolution.md       # versioning, ADRs, archival
+   │  └─ minimal-mode.md               # solo or throwaway lightweight setup
+   ├─ assets/
+   │  ├─ governance-templates/
+   │  │  ├─ AGENTS.md
+   │  │  ├─ CLAUDE.md
+   │  │  ├─ SPEC.md
+   │  │  ├─ ARCH.md
+   │  │  ├─ RULES.md
+   │  │  ├─ TASK.md
+   │  │  ├─ DECISION.md
+   │  │  ├─ CONTRACTS_README.md
+   │  │  ├─ cursor-project-governance.mdc
+   │  │  └─ claude-project-governance.md
+   │  ├─ contracts-examples/           # filled OpenAPI / JSON Schema / event / SQL / CLI / file-format
+   │  └─ examples/
+   │     └─ feedback-inbox/            # fully filled worked example
+   └─ scripts/
+      └─ check-governance.sh           # drift and missing-section detector
 ```
 
 ## License

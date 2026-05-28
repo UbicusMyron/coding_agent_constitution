@@ -1,0 +1,262 @@
+openapi: 3.0.3
+info:
+  title: Feedback Inbox API
+  version: 1.0.0
+  description: |
+    REST contract for the Feedback Inbox.
+    Owner: feedback-team.
+    Update in the same PR as any handler change. Breaking changes require an ADR.
+servers:
+  - url: https://api.example.com/v1
+    description: Production
+  - url: http://localhost:3000/v1
+    description: Local dev
+security:
+  - bearerAuth: []
+paths:
+  /feedback:
+    post:
+      summary: Submit feedback (public, unauthenticated)
+      operationId: submitFeedback
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackCreate'
+      responses:
+        '201':
+          description: Feedback recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feedback'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    get:
+      summary: List feedback (authenticated)
+      operationId: listFeedback
+      parameters:
+        - in: query
+          name: source
+          schema:
+            type: string
+            enum: [web, mobile, zapier, api]
+        - in: query
+          name: tag
+          schema:
+            type: string
+        - in: query
+          name: cursor
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+      responses:
+        '200':
+          description: Page of feedback
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /feedback/{id}/tags:
+    put:
+      summary: Replace tags on a feedback item
+      operationId: setFeedbackTags
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagsUpdate'
+      responses:
+        '200':
+          description: Updated feedback
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feedback'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /themes:
+    post:
+      summary: Create a theme by grouping feedback IDs
+      operationId: createTheme
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThemeCreate'
+      responses:
+        '201':
+          description: Theme created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Theme'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /themes/{id}/candidate-task:
+    post:
+      summary: Generate candidate task markdown for a theme
+      operationId: generateCandidateTask
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Candidate task markdown
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateTask'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    FeedbackCreate:
+      type: object
+      required: [source, message]
+      properties:
+        source: { type: string, enum: [web, mobile, zapier, api] }
+        email:  { type: string, format: email, nullable: true }
+        message:
+          type: string
+          minLength: 1
+          maxLength: 4000
+        tags:
+          type: array
+          items:
+            type: string
+            pattern: '^[a-z][a-z0-9-]{0,31}$'
+          maxItems: 8
+    Feedback:
+      type: object
+      required: [id, source, message, tags, createdAt]
+      properties:
+        id:        { type: string, format: uuid }
+        source:    { type: string }
+        email:     { type: string, nullable: true }
+        message:   { type: string }
+        tags:      { type: array, items: { type: string } }
+        themeId:   { type: string, format: uuid, nullable: true }
+        createdAt: { type: string, format: date-time }
+    FeedbackPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Feedback' }
+        nextCursor: { type: string, nullable: true }
+    TagsUpdate:
+      type: object
+      required: [tags]
+      properties:
+        tags:
+          type: array
+          items:
+            type: string
+            pattern: '^[a-z][a-z0-9-]{0,31}$'
+          maxItems: 8
+    ThemeCreate:
+      type: object
+      required: [name, feedbackIds]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        feedbackIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          minItems: 1
+          maxItems: 100
+    Theme:
+      type: object
+      required: [id, name, feedbackIds, createdAt]
+      properties:
+        id:          { type: string, format: uuid }
+        name:        { type: string }
+        feedbackIds: { type: array, items: { type: string, format: uuid } }
+        createdAt:   { type: string, format: date-time }
+    CandidateTask:
+      type: object
+      required: [themeId, markdown]
+      properties:
+        themeId:  { type: string, format: uuid }
+        markdown: { type: string }
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            - validation_error
+            - not_found
+            - rate_limited
+            - unauthorized
+            - forbidden
+            - conflict
+            - internal_error
+        message: { type: string }
+        fields:
+          type: array
+          items:
+            type: object
+            required: [field, rule]
+            properties:
+              field: { type: string }
+              rule:  { type: string }
+  responses:
+    ValidationError:
+      description: Validation failed
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    RateLimited:
+      description: Too many requests
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Missing or invalid token
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
